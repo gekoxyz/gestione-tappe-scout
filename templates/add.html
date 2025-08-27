@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoutApp | Aggiungi Censito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-8">
+
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Aggiungi Nuovo Censito</h1>
+            <p class="text-gray-600 mb-6">Compila i campi sottostanti per registrare un nuovo utente.</p>
+            
+            <form action="/add" method="POST">
+                
+                <!-- Nome -->
+                <div class="mb-4">
+                    <label for="nome" class="block text-gray-700 text-sm font-bold mb-2">Nome</label>
+                    <input type="text" id="nome" name="nome" placeholder="Mario" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <!-- Cognome -->
+                <div class="mb-4">
+                    <label for="cognome" class="block text-gray-700 text-sm font-bold mb-2">Cognome</label>
+                    <input type="text" id="cognome" name="cognome" placeholder="Rossi" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <!-- Anno di Nascita -->
+                <div class="mb-4">
+                    <label for="anno_nascita" class="block text-gray-700 text-sm font-bold mb-2">
+                        Anno di Nascita
+                    </label>
+                    <div class="relative">
+                        <select id="anno_nascita" name="anno_nascita"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="" disabled selected>Seleziona un anno...</option>
+                            {% for year in years %}
+                                <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Codice Censimento -->
+                <div class="mb-4">
+                    <label for="codice_censimento" class="block text-gray-700 text-sm font-bold mb-2">
+                        Codice Censimento <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="codice_censimento" name="codice_censimento" placeholder="123456" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <!-- Branca -->
+                <div class="mb-6">
+                    <label for="branca" class="block text-gray-700 text-sm font-bold mb-2">Branca</label>
+                    <div class="relative">
+                        <select id="branca" name="branca" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="">Seleziona una branca...</option>
+                            <option value="L/C">Lupetti/Coccinelle (L/C)</option>
+                            <option value="E/G">Esploratori/Guide (E/G)</option>
+                            <option value="R/S">Rover/Scolte (R/S)</option>
+                            <option value="Co.Ca.">Comunità Capi (Co.Ca.)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex items-center justify-end">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Aggiungi scout
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</body>
+</html>

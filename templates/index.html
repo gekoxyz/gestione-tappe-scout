@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoutApp | Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-8">
+
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-sm">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Elenco Censiti</h1>
+
+        <!-- Search Box -->
+        <div class="mb-4">
+            <input 
+                type="text" 
+                id="searchBox" 
+                placeholder="Cerca per nome, cognome, etc..." 
+                class="p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+        </div>
+
+        <!-- Add scout -->
+        <div class="mb-4">
+            <a 
+            href="{{ url_for('add') }}" 
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+            Aggiungi scout
+            </a>
+        </div>
+        
+        <!-- Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="scoutTable">
+                <thead class="bg-gray-100">
+                    <tr>
+                        {% for header in headers %}
+                        <th class="p-3 text-sm font-semibold text-gray-600 border-b">{{ header }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scout in basic_scout_info %}
+                    <tr 
+                        class="hover:bg-gray-50 cursor-pointer" 
+                        onclick="window.location.href='{{ url_for('scout_detail', scout_id=scout[2]) }}';"
+                    >
+                        {% for item in scout %}
+                        <td class="p-3 text-gray-700 border-b border-gray-200">{{ item }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchBox = document.getElementById('searchBox');
+            const tableRows = document.querySelectorAll('#scoutTable tbody tr');
+
+            searchBox.addEventListener('keyup', function() {
+                const searchTerm = searchBox.value.toLowerCase();
+
+                tableRows.forEach(row => {
+                    const rowText = row.textContent.toLowerCase();
+                    if (rowText.includes(searchTerm)) {
+                        row.style.display = ''; // Show the row
+                    } else {
+                        row.style.display = 'none'; // Hide the row
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
