@@ -19,10 +19,9 @@ worksheet = spreadsheet.worksheet(WORKSHEET_NAME)
 
 
 def get_sheet_data():
-    print(type(LOCAL))
     if LOCAL == 0:
         data = worksheet.get_all_records()
-        print("loaded data from drive")
+        print("[INFO] - loaded data from drive")
         with open("tempdata.json", "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
     else:
@@ -42,15 +41,15 @@ def index():
 
 
 TAPPA_DISPLAY_NAMES = {
-    "tappa_LC_1": "L/C 1",
-    "tappa_LC_2": "L/C 2",
-    "tappa_LC_3": "L/C 3",
-    "tappa_scoperta": "Scoperta",
-    "tappa_competenza": "Competenza",
-    "tappa_responsabilita": "Responsabilità",
-    "tappa_RS_1": "",
-    "tappa_RS_2": "",
-    "tappa_RS_3": ""
+    "tappa_LC_1": "L/C Scoperta",
+    "tappa_LC_2": "L/C Competenza",
+    "tappa_LC_3": "L/C Responsabilità",
+    "tappa_scoperta": "E/G Scoperta",
+    "tappa_competenza": "E/G Competenza",
+    "tappa_responsabilita": "E/G Responsabilità",
+    "tappa_RS_1": "R/S Scoperta",
+    "tappa_RS_2": "R/S Competenza",
+    "tappa_RS_3": "R/S Responsabilità"
 }
 
 @app.route("/scout/<scout_id>")
@@ -113,7 +112,7 @@ def add():
         codice_censimento = request.form.get('codice_censimento')
         branca = request.form.get('branca')
 
-        # --- YOUR VALIDATION LOGIC GOES HERE ---
+        # --- TODO: ADD VALIDATION LOGIC ---
         
         print("--- NUOVO UTENTE RICEVUTO ---")
         print(f"Nome: {nome}")
@@ -125,32 +124,68 @@ def add():
     
         worksheet.append_row([nome, cognome, codice_censimento, anno_nascita, branca])
 
-        return f"""
-            <h1>Utente Aggiunto con Successo!</h1>
-            <p>Dati ricevuti:</p>
-            <ul>
-                <li>Nome: {nome}</li>
-                <li>Cognome: {cognome}</li>
-                <li>Anno di Nascita: {anno_nascita}</li>
-                <li>Codice Censimento: {codice_censimento}</li>
-                <li>Branca: {branca}</li>
-            </ul>
-            <a href="/add">Aggiungi un altro utente</a>
-        """
+        return redirect(url_for("index"))
+        # return f"""
+        #     <h1>Utente Aggiunto con Successo!</h1>
+        #     <p>Dati ricevuti:</p>
+        #     <ul>
+        #         <li>Nome: {nome}</li>
+        #         <li>Cognome: {cognome}</li>
+        #         <li>Anno di Nascita: {anno_nascita}</li>
+        #         <li>Codice Censimento: {codice_censimento}</li>
+        #         <li>Branca: {branca}</li>
+        #     </ul>
+        #     <a href="/add">Aggiungi un altro utente</a>
+        # """
     
     return render_template('add.html', years=range(2040, 1980, -1))
 
 
-@app.route("/delete", methods=["GET", "POST"])
-def delete():
+@app.route("/delete/<scout_to_delete_id>", methods=["GET", "POST"])
+def delete(scout_to_delete_id):
     if request.method == "POST":
-        scout_to_delete_id = request.form.get("codice_censimento")
         codici_censimento = worksheet.col_values(3)
         index_to_delete = -1
-        if scout_to_delete_id in codici_censimento: index_to_delete = codici_censimento.index(scout_to_delete_id)
-        if index_to_delete != -1: worksheet.delete_rows(index_to_delete + 1)
+        if scout_to_delete_id in codici_censimento: index_to_delete = codici_censimento.index(scout_to_delete_id) + 1 # 1 to skip headers
+        print(f"[INFO] - Deleting scout with ID {scout_to_delete_id}")
+        if index_to_delete != -1: worksheet.delete_rows(index_to_delete)
 
     return redirect(url_for("index"))
+
+
+@app.route("/update/<scout_to_update_id>", methods=["GET", "POST"])
+def update(scout_to_update_id):
+    
+    if request.method == "POST":
+        print("IN UPDATE")
+
+        # nome = request.form.get('nome')
+        # cognome = request.form.get('cognome')
+        # anno_nascita = request.form.get('anno_nascita')
+        # branca = request.form.get('branca')
+
+        # # nome	cognome	codice_censimento	anno_nascita	branca	tappa_LC_1	tappa_LC_2	tappa_LC_3	tappa_scoperta	tappa_competenza	tappa_responsabilita	tappa_RS_1	tappa_RS_2	tappa_RS_3	special_1	special_1_desc	special_1_tipo
+        
+        # print(f"--- AGGIORNAMENTO SCOUT {scout_to_update_id} RICEVUTO ---")
+        # print(f"Nome: {nome}")
+        # print(f"Cognome: {cognome}")
+        # print(f"Anno di Nascita: {anno_nascita}")
+        # print(f"Branca: {branca}")
+        # print("----------------------------")
+
+        # updated_data = [nome, cognome, scout_to_update_id, anno_nascita, branca]
+
+        # index_to_update = -1
+        # codici_censimento = worksheet.col_values(3)
+        # if scout_to_update_id in codici_censimento: index_to_update = codici_censimento.index(scout_to_update_id) + 1 # 1 to skip headers
+        # if index_to_update != -1:
+        #     range_to_update = f'A{index_to_update}:E{index_to_update}' 
+        #     worksheet.update(range_to_update, [updated_data])
+
+        # return redirect(f"/scout/{scout_to_update_id}")
+
+    return redirect(url_for("index"))
+
 
 if __name__ == "__main__":
     # webview.create_window(f"ScoutApp", app, width=1024, height=768)
