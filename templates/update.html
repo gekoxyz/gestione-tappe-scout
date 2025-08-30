@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoutApp | Modifica Scout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans p-8">
+
+    {#--- JINJA MACROS DEFINITION ---#}
+    {% macro render_tappa_row(tappa=None) %}
+    <div class="tappa-item flex items-center space-x-4 p-3 bg-gray-50 rounded-md">
+        <div class="flex-grow">
+            <label class="text-xs text-gray-500">Nome Tappa</label>
+            <input type="text" name="tappa_name[]" value="{{ tappa.name if tappa else '' }}" placeholder="Nome Tappa" required
+                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm">
+        </div>
+        <div class="flex-grow">
+            <label class="text-xs text-gray-500">Data</label>
+            <!-- <input type="text" name="tappa_date[]" value="{{ tappa.date if tappa else '' }}" required
+                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm"> -->
+            <textarea class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm" name="tappa_date[]" id="">{{ tappa.date if tappa else '' }}</textarea>
+        </div>
+    </div>
+    {% endmacro %}
+    
+    {% macro render_specialita_row(special=None) %}
+    <div class="specialita-item p-4 bg-gray-50 rounded-md border border-gray-200">
+        <div class="flex items-start space-x-4">
+            <div class="flex-grow space-y-3">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-500">Nome</label>
+                        <input type="text" name="specialita_name[]" value="{{ special.name if special else '' }}" placeholder="Nome Specialità" required
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Tipo</label>
+                        <input type="text" name="specialita_type[]" value="{{ special.type if special else '' }}" placeholder="Tipo (opzionale)"
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500">Descrizione</label>
+                    <textarea name="specialita_description[]" placeholder="Descrizione (opzionale)" rows="2"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm">{{ special.description if special else '' }}</textarea>
+                </div>
+            </div>
+            <button type="button" class="remove-btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-md mt-5">
+                &times;
+            </button>
+        </div>
+    </div>
+    {% endmacro %}
+    {#--- END OF MACROS ---#}
+
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md p-8">
+
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">
+                Modifica Dettagli: {{ scout.nome }} {{ scout.cognome }}
+            </h1>
+
+            <form action="{{ url_for('update', scout_to_update_id=scout.codice_censimento) }}" method="POST">
+                <!-- Main Info Section -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Nome, Cognome, Codice, Anno, Branca... same as before -->
+                    <div>
+                        <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                        <input type="text" name="nome" id="nome" value="{{ scout.nome }}" required
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="cognome" class="block text-sm font-medium text-gray-700 mb-1">Cognome</label>
+                        <input type="text" name="cognome" id="cognome" value="{{ scout.cognome }}" required
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="codice_censimento" class="block text-sm font-medium text-gray-700 mb-1">Codice
+                            Censimento</label>
+                        <input type="text" name="codice_censimento" id="codice_censimento" value="{{ scout.codice_censimento }}" readonly
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label for="anno_nascita" class="block text-sm font-medium text-gray-700 mb-1">Anno di Nascita</label>
+                        <input type="number" name="anno_nascita" id="anno_nascita" value="{{ scout.anno_nascita }}" required
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="branca" class="block text-sm font-medium text-gray-700 mb-1">Branca</label>
+                        <select name="branca" id="branca" required
+                            class="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="L/C" {% if scout.branca=='L/C' %}selected{% endif %}>Lupetti/Coccinelle (L/C)</option>
+                            <option value="E/G" {% if scout.branca=='E/G' %}selected{% endif %}>Esploratori/Guide (E/G)</option>
+                            <option value="R/S" {% if scout.branca=='R/S' %}selected{% endif %}>Rover/Scolte (R/S)</option>
+                            <option value="Co.Ca." {% if scout.branca=='Co.Ca.' %}selected{% endif %}>Comunità Capi (Co.Ca.)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ### TAPPE ### -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3 border-b pb-2">Tappe</h2>
+                    <div id="tappe-container" class="space-y-4">
+                        <!-- Use the macro to render existing tappe -->
+                        {% for tappa in tappe %}
+                            {{ render_tappa_row(tappa) }}
+                        {% endfor %}
+                    </div>
+                    <!-- <button type="button" id="add-tappa-btn" class="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded text-sm">
+                        + Aggiungi Tappa
+                    </button> -->
+                </div>
+                
+                <!-- ### SPECIALITÀ ### -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3 border-b pb-2">Specialità</h2>
+                    <div id="specialita-container" class="space-y-4">
+                        <!-- Use the macro to render existing specialità -->
+                        {% for special in specialita %}
+                            {{ render_specialita_row(special) }}
+                        {% endfor %}
+                    </div>
+                    <button type="button" id="add-specialita-btn" class="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded text-sm">
+                        + Aggiungi Specialità
+                    </button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end space-x-4 pt-6 border-t">
+                    <a href="/" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Annulla
+                    </a>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Salva Modifiche
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Hidden templates for cloning with JavaScript -->
+    <template id="tappa-template">
+        {{ render_tappa_row() }}
+    </template>
+    <template id="specialita-template">
+        {{ render_specialita_row() }}
+    </template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // --- Gestione Tappe ---
+            const tappeContainer = document.getElementById('tappe-container');
+            const tappaTemplate = document.getElementById('tappa-template');
+
+            // --- Gestione Specialità ---
+            const specialitaContainer = document.getElementById('specialita-container');
+            const addSpecialitaBtn = document.getElementById('add-specialita-btn');
+            const specialitaTemplate = document.getElementById('specialita-template');
+
+            addSpecialitaBtn.addEventListener('click', () => {
+                const newSpecialitaRow = specialitaTemplate.content.cloneNode(true);
+                specialitaContainer.appendChild(newSpecialitaRow);
+            });
+            
+            // --- Gestione Rimozione (universale) ---
+            document.body.addEventListener('click', function(event) {
+                if (event.target.classList.contains('remove-btn')) {
+                    const itemToRemove = event.target.closest('.tappa-item, .specialita-item');
+                    if (itemToRemove) {
+                        itemToRemove.remove();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

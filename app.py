@@ -78,7 +78,6 @@ def scout_detail(scout_id):
             })
     
     specialita = []
-
     for i in range(1, 10): 
         name_key = f'special_{i}'
         if not scout.get(name_key): continue
@@ -120,7 +119,7 @@ def add():
         print(f"Codice Censimento: {codice_censimento}")
         print(f"Anno di Nascita: {anno_nascita}")
         print(f"Branca: {branca}")
-        print("----------------------------")
+        print("-----------------------------")
     
         worksheet.append_row([nome, cognome, codice_censimento, anno_nascita, branca])
 
@@ -153,38 +152,112 @@ def delete(scout_to_delete_id):
     return redirect(url_for("index"))
 
 
+# nome = request.form.get('nome')
+# cognome = request.form.get('cognome')
+# anno_nascita = request.form.get('anno_nascita')
+# branca = request.form.get('branca')
+
+# # nome	cognome	codice_censimento	anno_nascita	branca	tappa_LC_1	tappa_LC_2	tappa_LC_3	tappa_scoperta	tappa_competenza	tappa_responsabilita	tappa_RS_1	tappa_RS_2	tappa_RS_3	special_1	special_1_desc	special_1_tipo
+
+# print(f"--- AGGIORNAMENTO SCOUT {scout_to_update_id} RICEVUTO ---")
+# print(f"Nome: {nome}")
+# print(f"Cognome: {cognome}")
+# print(f"Anno di Nascita: {anno_nascita}")
+# print(f"Branca: {branca}")
+# print("----------------------------")
+
+# updated_data = [nome, cognome, scout_to_update_id, anno_nascita, branca]
+
+# index_to_update = -1
+# codici_censimento = worksheet.col_values(3)
+# if scout_to_update_id in codici_censimento: index_to_update = codici_censimento.index(scout_to_update_id) + 1 # 1 to skip headers
+# if index_to_update != -1:
+#     range_to_update = f'A{index_to_update}:E{index_to_update}' 
+#     worksheet.update(range_to_update, [updated_data])
+
+# return redirect(f"/scout/{scout_to_update_id}")
 @app.route("/update/<scout_to_update_id>", methods=["GET", "POST"])
 def update(scout_to_update_id):
     
     if request.method == "POST":
-        print("IN UPDATE")
+        update_data = request.form.to_dict(flat=False)
 
-        # nome = request.form.get('nome')
-        # cognome = request.form.get('cognome')
-        # anno_nascita = request.form.get('anno_nascita')
-        # branca = request.form.get('branca')
-
-        # # nome	cognome	codice_censimento	anno_nascita	branca	tappa_LC_1	tappa_LC_2	tappa_LC_3	tappa_scoperta	tappa_competenza	tappa_responsabilita	tappa_RS_1	tappa_RS_2	tappa_RS_3	special_1	special_1_desc	special_1_tipo
+        basic_info = {
+            "nome": update_data.get("nome"),
+            "cognome": update_data.get("cognome"),
+            "codice_censimento": scout_to_update_id,
+            "anno_nascita": update_data.get("anno_nascita"),
+            "branca": update_data.get("branca")
+        }
         
-        # print(f"--- AGGIORNAMENTO SCOUT {scout_to_update_id} RICEVUTO ---")
-        # print(f"Nome: {nome}")
-        # print(f"Cognome: {cognome}")
-        # print(f"Anno di Nascita: {anno_nascita}")
-        # print(f"Branca: {branca}")
-        # print("----------------------------")
+        tappe = []
+        for display_name, value in zip(update_data.get("tappa_name[]"), update_data.get("tappa_date[]")):
+            tappe.append({
+                'name': display_name,
+                'date': value
+            })
 
-        # updated_data = [nome, cognome, scout_to_update_id, anno_nascita, branca]
+        specialita = []
+        for special_name, special_type, special_desc in zip(update_data.get("specialita_name[]"), update_data.get("specialita_type[]"), update_data.get("specialita_description[]")):
+            specialita_item = {
+                'name': special_name,
+                'type': special_type,
+                'description': special_desc
+            }
+        specialita.append(specialita_item)
 
-        # index_to_update = -1
-        # codici_censimento = worksheet.col_values(3)
-        # if scout_to_update_id in codici_censimento: index_to_update = codici_censimento.index(scout_to_update_id) + 1 # 1 to skip headers
-        # if index_to_update != -1:
-        #     range_to_update = f'A{index_to_update}:E{index_to_update}' 
-        #     worksheet.update(range_to_update, [updated_data])
+        context = {
+            "scout": basic_info,
+            "tappe": tappe,
+            "specialita": specialita
+        }
+        print(context)
 
-        # return redirect(f"/scout/{scout_to_update_id}")
+        # TODO: UPDATE THE ROW WITH ALL CONTEXT
 
-    return redirect(url_for("index"))
+        return redirect(url_for('scout_detail', scout_id=scout_to_update_id))
+
+    # retrieve scout data
+    sheet_data = get_sheet_data()
+    for scout in sheet_data:
+        if scout['codice_censimento'] == int(scout_to_update_id): break
+
+    basic_info = {
+        "nome": scout.get("nome"),
+        "cognome": scout.get("cognome"),
+        "codice_censimento": scout.get("codice_censimento"),
+        "anno_nascita": scout.get("anno_nascita"),
+        "branca": scout.get("branca")
+    }
+
+    tappe = []
+    for db_key, display_name in TAPPA_DISPLAY_NAMES.items():
+        value = scout.get(db_key)
+        tappe.append({
+            'name': display_name,
+            'date': value
+        })
+    
+    specialita = []
+    for i in range(1, 10): 
+        name_key = f'special_{i}'
+        if not scout.get(name_key): continue
+
+        specialita_item = {
+            'name': scout.get(name_key),
+            'type': scout.get(f'special_{i}_tipo'),
+            'description': scout.get(f'special_{i}_desc')
+        }
+        specialita.append(specialita_item)
+
+    context = {
+        "scout": basic_info,
+        "tappe": tappe,
+        "specialita": specialita
+    }
+
+    # return original scout data
+    return render_template("update.html", **context)
 
 
 if __name__ == "__main__":
