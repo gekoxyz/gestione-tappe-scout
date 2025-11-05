@@ -124,18 +124,6 @@ def add():
         worksheet.append_row([nome, cognome, codice_censimento, anno_nascita, branca])
 
         return redirect(url_for("index"))
-        # return f"""
-        #     <h1>Utente Aggiunto con Successo!</h1>
-        #     <p>Dati ricevuti:</p>
-        #     <ul>
-        #         <li>Nome: {nome}</li>
-        #         <li>Cognome: {cognome}</li>
-        #         <li>Anno di Nascita: {anno_nascita}</li>
-        #         <li>Codice Censimento: {codice_censimento}</li>
-        #         <li>Branca: {branca}</li>
-        #     </ul>
-        #     <a href="/add">Aggiungi un altro utente</a>
-        # """
     
     return render_template('add.html', years=range(2040, 1980, -1))
 
@@ -152,68 +140,34 @@ def delete(scout_to_delete_id):
     return redirect(url_for("index"))
 
 
-# nome = request.form.get('nome')
-# cognome = request.form.get('cognome')
-# anno_nascita = request.form.get('anno_nascita')
-# branca = request.form.get('branca')
-
-# # nome	cognome	codice_censimento	anno_nascita	branca	tappa_LC_1	tappa_LC_2	tappa_LC_3	tappa_scoperta	tappa_competenza	tappa_responsabilita	tappa_RS_1	tappa_RS_2	tappa_RS_3	special_1	special_1_desc	special_1_tipo
-
-# print(f"--- AGGIORNAMENTO SCOUT {scout_to_update_id} RICEVUTO ---")
-# print(f"Nome: {nome}")
-# print(f"Cognome: {cognome}")
-# print(f"Anno di Nascita: {anno_nascita}")
-# print(f"Branca: {branca}")
-# print("----------------------------")
-
-# updated_data = [nome, cognome, scout_to_update_id, anno_nascita, branca]
-
-# index_to_update = -1
-# codici_censimento = worksheet.col_values(3)
-# if scout_to_update_id in codici_censimento: index_to_update = codici_censimento.index(scout_to_update_id) + 1 # 1 to skip headers
-# if index_to_update != -1:
-#     range_to_update = f'A{index_to_update}:E{index_to_update}' 
-#     worksheet.update(range_to_update, [updated_data])
-
-# return redirect(f"/scout/{scout_to_update_id}")
 @app.route("/update/<scout_to_update_id>", methods=["GET", "POST"])
 def update(scout_to_update_id):
     
     if request.method == "POST":
         update_data = request.form.to_dict(flat=False)
 
-        basic_info = {
-            "nome": update_data.get("nome"),
-            "cognome": update_data.get("cognome"),
-            "codice_censimento": scout_to_update_id,
-            "anno_nascita": update_data.get("anno_nascita"),
-            "branca": update_data.get("branca")
-        }
+        nome = update_data.get("nome")[0]
+        cognome = update_data.get("cognome")[0]
+        anno_nascita = update_data.get("anno_nascita")[0]
+        branca = update_data.get("branca")[0]
         
-        tappe = []
+        updated_data = [nome, cognome, scout_to_update_id, anno_nascita, branca]
+        
         for display_name, value in zip(update_data.get("tappa_name[]"), update_data.get("tappa_date[]")):
-            tappe.append({
-                'name': display_name,
-                'date': value
-            })
-
-        specialita = []
+            updated_data.append(value)
         for special_name, special_type, special_desc in zip(update_data.get("specialita_name[]"), update_data.get("specialita_type[]"), update_data.get("specialita_description[]")):
-            specialita_item = {
-                'name': special_name,
-                'type': special_type,
-                'description': special_desc
-            }
-        specialita.append(specialita_item)
+            updated_data.extend([special_name, special_type, special_desc])
 
-        context = {
-            "scout": basic_info,
-            "tappe": tappe,
-            "specialita": specialita
-        }
-        print(context)
-
-        # TODO: UPDATE THE ROW WITH ALL CONTEXT
+        index_to_update = -1
+        codici_censimento = worksheet.col_values(3)
+        if scout_to_update_id in codici_censimento: index_to_update = codici_censimento.index(scout_to_update_id) + 1 # 1 to skip headers
+        if index_to_update != -1:
+            range_to_update = f'{index_to_update}:{index_to_update}' 
+            print("-"*20)
+            print("-"*20)
+            print(updated_data)
+            print("-"*20)
+            worksheet.update(range_to_update, [updated_data])
 
         return redirect(url_for('scout_detail', scout_id=scout_to_update_id))
 
@@ -261,10 +215,8 @@ def update(scout_to_update_id):
 
 
 if __name__ == "__main__":
-    # webview.create_window(f"ScoutApp", app, width=1024, height=768)
-    # webview.start(debug=True)
+    webview.create_window(f"ScoutApp", app, width=1024, height=768)
+    webview.start(debug=True)
     app.run()
 
 
-
-# TODO: MODIFICARE SU PAGINA DETAILS.HTML MODIFICA DETTAGLI
